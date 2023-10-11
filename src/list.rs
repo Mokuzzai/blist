@@ -7,18 +7,18 @@ use std::slice;
 
 #[derive(Copy)]
 /// A nonempty list that is ordered
-pub struct List<T, const N: usize> {
+pub struct BArrayVec<T, const N: usize> {
 	len: NonZeroU8,
 	buf: [MaybeUninit<T>; N],
 }
 
-impl<T: Default, const N: usize> Default for List<T, N> {
+impl<T: Default, const N: usize> Default for BArrayVec<T, N> {
 	fn default() -> Self {
-		List::new(Default::default())
+		BArrayVec::new(Default::default())
 	}
 }
 
-impl<T: Clone, const N: usize> Clone for List<T, N> {
+impl<T: Clone, const N: usize> Clone for BArrayVec<T, N> {
 	fn clone(&self) -> Self {
 		let mut iter = self.iter().cloned();
 
@@ -34,13 +34,13 @@ impl<T: Clone, const N: usize> Clone for List<T, N> {
 	}
 }
 
-impl<T: PartialEq, const N: usize> PartialEq for List<T, N> {
+impl<T: PartialEq, const N: usize> PartialEq for BArrayVec<T, N> {
 	fn eq(&self, other: &Self) -> bool {
 		self.len() == other.len() && self.iter().eq(other.iter())
 	}
 }
 
-impl<T, const N: usize> Deref for List<T, N> {
+impl<T, const N: usize> Deref for BArrayVec<T, N> {
 	type Target = [T];
 
 	fn deref(&self) -> &Self::Target {
@@ -51,7 +51,7 @@ impl<T, const N: usize> Deref for List<T, N> {
 const _: () = {
 	use std::fmt::*;
 
-	impl<T: Debug, const N: usize> Debug for List<T, N> {
+	impl<T: Debug, const N: usize> Debug for BArrayVec<T, N> {
 		fn fmt(&self, f: &mut Formatter) -> Result {
 			let mut f = f.debug_list();
 
@@ -68,7 +68,7 @@ pub enum AbsoluteOrdering {
 	Greater,
 }
 
-impl<T, const N: usize> List<T, N> {
+impl<T, const N: usize> BArrayVec<T, N> {
 	pub fn new(item: T) -> Self {
 		assert!(N != 0 && N < (u8::MAX as usize));
 
@@ -165,7 +165,7 @@ impl<T, const N: usize> List<T, N> {
 	}
 }
 
-impl<T, const N: usize> List<T, N>
+impl<T, const N: usize> BArrayVec<T, N>
 where
 	T: Ord,
 {
@@ -206,7 +206,7 @@ where
 const _ASSERT_NULL_OPTIMIZED: () = {
 	use std::mem::size_of;
 
-	type L = List<i32, 5>;
+	type L = BArrayVec<i32, 5>;
 
 	if size_of::<L>() != size_of::<Option<L>>() {
 		panic!("`List<T, N>` is not null optimized");
@@ -215,7 +215,7 @@ const _ASSERT_NULL_OPTIMIZED: () = {
 
 #[test]
 fn test_push() {
-	let mut this = List::<i32, 5>::new(100);
+	let mut this = BArrayVec::<i32, 5>::new(100);
 
 	for i in 101..105 {
 		this._push(i).unwrap();
@@ -231,7 +231,7 @@ fn test_push() {
 
 #[test]
 fn test_push_front() {
-	let mut this = List::<i32, 5>::new(100);
+	let mut this = BArrayVec::<i32, 5>::new(100);
 
 	for i in 101..105 {
 		this._push_front(i).unwrap();
@@ -247,7 +247,7 @@ fn test_push_front() {
 
 #[test]
 fn test_insert() {
-	let mut this = List::<i32, 5>::new(100);
+	let mut this = BArrayVec::<i32, 5>::new(100);
 
 	this.insert(-101).unwrap();
 	this.insert(102).unwrap();

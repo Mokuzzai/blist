@@ -1,10 +1,10 @@
 mod list;
 
 pub use list::AbsoluteOrdering;
-pub use list::List;
+pub use list::BArrayVec;
 
 pub struct Node<T, const N: usize> {
-	items: List<T, N>,
+	items: BArrayVec<T, N>,
 
 	next: Option<Box<Self>>,
 }
@@ -28,7 +28,7 @@ const _: () = {
 		}
 	}
 
-	impl<T: Debug, const N: usize> Debug for LinkedLists<T, N> {
+	impl<T: Debug, const N: usize> Debug for BList<T, N> {
 		fn fmt(&self, f: &mut Formatter) -> Result {
 			let mut next = self.root.as_ref();
 
@@ -48,7 +48,7 @@ const _: () = {
 impl<T, const N: usize> Node<T, N> {
 	pub fn new(item: T) -> Self {
 		Self {
-			items: List::new(item),
+			items: BArrayVec::new(item),
 
 			next: None,
 		}
@@ -81,7 +81,7 @@ where
 	pub fn find(&self, item: &T) -> Option<usize> {
 		match self.items.find(item) {
 			Ok(index) => index,
-			Err(AbsoluteOrdering::Greater) => self.next.as_ref()?.find(item),
+			Err(AbsoluteOrdering::Greater) => Some(self.items.len() + self.next.as_ref()?.find(item)?),
 			Err(AbsoluteOrdering::Less) => None,
 		}
 	}
@@ -90,13 +90,13 @@ where
 	}
 }
 
-pub struct LinkedLists<T, const N: usize> {
+pub struct BList<T, const N: usize> {
 	root: Option<Node<T, N>>,
 
 	len: usize,
 }
 
-impl<T, const N: usize> LinkedLists<T, N> {
+impl<T, const N: usize> BList<T, N> {
 	pub const fn new() -> Self {
 		Self { root: None, len: 0 }
 	}
@@ -105,7 +105,7 @@ impl<T, const N: usize> LinkedLists<T, N> {
 	}
 }
 
-impl<T, const N: usize> LinkedLists<T, N>
+impl<T, const N: usize> BList<T, N>
 where
 	T: Ord,
 {

@@ -1,7 +1,7 @@
 use blist::*;
 
 fn main() {
-	let mut list = LinkedLists::<i32, 15>::new();
+	let mut list = BList::<i32, 15>::new();
 
 	for i in -50..50 {
 		list.insert(i);
